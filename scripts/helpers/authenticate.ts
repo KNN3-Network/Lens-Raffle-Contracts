@@ -3,7 +3,7 @@ import { Signer } from 'ethers/lib/ethers'
 import { client, challenge, authenticate } from '../../lensApi/api'
 
 
-export default async (deployer: SignerWithAddress) => {
+export const getToken = async (deployer: SignerWithAddress) => {
 
 
   try {

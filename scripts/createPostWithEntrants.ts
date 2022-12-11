@@ -3,7 +3,10 @@ import LENS_HUB_ABI from '../abi/LensHubABI.json';
 import { DataTypes } from "../LensTypes/LensHub";
 import { client, challenge, authenticate } from '../lensApi/api'
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import getToken from './helpers/authenticate'
+import {getToken} from './helpers/authenticate'
+import { v4 as uuidv4 } from 'uuid';
+import { uploadIpfs } from "./helpers/ipfs";
+import { Metadata, PublicationMainFocus } from "./helpers/interfaces/publication";
 
 const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
 
@@ -19,8 +22,23 @@ async function main() {
 // dep0 makes a post, dep1, dep2, dep3 comment. 
   
 const token = await getToken(deployers[0])
-   console.log(token)
 
+const ipfsResult = await uploadIpfs<Metadata>({
+  version: '2.0.0',
+  mainContentFocus: PublicationMainFocus.TEXT_ONLY,
+  metadata_id: uuidv4(),
+  description: 'Description',
+  locale: 'en-US',
+  content: 'Content',
+  external_url: null,
+  image: null,
+  imageMimeType: null,
+  name: 'Name',
+  attributes: [],
+  tags: ['using_api_examples'],
+  appId: 'api_examples_github',
+});
+console.log('create post: ipfs result', ipfsResult);
 
 
 // for(let i = 0; i<createProfileContracts.length; i++) {
