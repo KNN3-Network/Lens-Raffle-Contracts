@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import LENS_HUB_ABI from '../abi/LensHubABI.json';
 import MOCK_PROFILE_CREATION_PROXY_ABI from '../abi/CreateProfileAbi.json'
+import { DataTypes } from "../LensTypes/LensHub";
 const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
 
 
@@ -14,9 +15,6 @@ async function main() {
 
 // dep0 makes a post, dep1, dep2, dep3 comment. 
   
-
-
-
 
    
 
