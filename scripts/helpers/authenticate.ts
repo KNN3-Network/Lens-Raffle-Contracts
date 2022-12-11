@@ -19,6 +19,7 @@ export const getToken = async (deployer: SignerWithAddress) => {
     /* authenticate the user */
     const authData = await client.mutation(authenticate, {address, signature}).toPromise()
     /* if user authentication is successful, you will receive an accessToken and refreshToken */
+    console.log(authData)
     const { data: { authenticate: { accessToken }}} = authData
     console.log({ accessToken })
     return accessToken
