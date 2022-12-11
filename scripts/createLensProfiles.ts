@@ -8,7 +8,7 @@ async function main() {
   const deployers = await ethers.getSigners()
   // array of 5 signers
   const contracts = await Promise.all(deployers.map(async dep => await ethers.getContractAt(LENS_HUB_ABI, LENS_HUB_MUMBAI_PROXY, dep)))
-  console.log(contracts.length)
+
 
 
   /**
@@ -30,22 +30,6 @@ async function main() {
     string followNFTURI;
 }*/
 
-///testing, delete later
-// const BumpaDumpaFactory = await ethers.getContractFactory(
-//   "contracts/Test.sol:Handle"
-// )
-// const Handle = await BumpaDumpaFactory.deploy() // msg.sender is dep1
-// await Handle.deployed()
-
-// console.log(`Summon Manager contract deployed at ${Handle.address}`)
-
-// // const bumpadumpa = Handle.connect() // connecting bayc with second signer
-// let tx = await Handle.callStatic.getHandle(`LuckyLensTester0`)
-
-// console.log(tx)
-// testing^^
-
-
 
 const MOCK_PROFILE_CREATION_PROXY = "0x420f0257D43145bb002E69B14FF2Eb9630Fc4736"
 const createProfileContracts = await Promise.all(deployers.map(async dep => await ethers.getContractAt(MOCK_PROFILE_CREATION_PROXY_ABI, MOCK_PROFILE_CREATION_PROXY, dep)))
@@ -60,9 +44,24 @@ for(let i = 0; i<createProfileContracts.length; i++) {
   let tx = await CCreateProfile.proxyCreateProfile([`${address}`, `luckylens${i}`, "" , '0x0000000000000000000000000000000000000000', '0x', ''], {gasLimit: 450000})
   console.log(`profile being created at tx_hash: ${tx.hash}`)
   let tx_r = await tx.wait(1)
+  console.log(tx_r.events)
   if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
   console.log(`profile successfully created for address ${i}`)
 }
+
+// let profileIds = ['23706', '23707', '23708', '23709', '23710' ]
+
+// for(let i = 0; i<contracts.length; i++) {
+//   let Hub = contracts[i]
+//   let deployer = deployers[i]
+//   let address = await deployer.getAddress()
+
+//   let tx = await Hub.setDefaultProfile(profileIds[i])
+//   console.log(`profile being set for ${i} at tx_hash: ${tx.hash}`)
+//   let tx_r = await tx.wait(1)
+//   if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
+//   console.log(`profile successfully set for address ${i}`)
+// }
 
 
 }
