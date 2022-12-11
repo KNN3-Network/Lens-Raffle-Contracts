@@ -7,7 +7,10 @@ const DEV1:string = process.env.DEV_PRIVATE_KEY || ""
 const DEV2:string =  process.env.DEV_PRIVATE_KEY_2 || ""
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.17",
+  solidity: {compilers: [
+    { version: "0.8.17" },
+    { version: "0.8.10" }
+  ]},
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
@@ -29,7 +32,13 @@ const config: HardhatUserConfig = {
 
 
     }
-  }
+  },
+  etherscan: {
+    apiKey: {
+      mumbai: 'H36AJYC5NPVURKBKFZNG3Z8812QBSZBU5S',
+      polygon: 'H36AJYC5NPVURKBKFZNG3Z8812QBSZBU5S'
+    }
+  },
 }
 
 export default config;
