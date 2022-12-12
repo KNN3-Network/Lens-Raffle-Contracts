@@ -2,9 +2,11 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { Signer } from 'ethers/lib/ethers'
 import { client, challenge, authenticate } from '../../lensApi/api'
 
+let tokens:{[address: string]: string} = {}
+
 
 export const getToken = async (deployer: SignerWithAddress) => {
-
+  if(tokens[deployer.address]) return tokens[deployer.address]
 
   try {
     const address = deployer.address
@@ -22,10 +24,12 @@ export const getToken = async (deployer: SignerWithAddress) => {
     console.log(authData)
     const { data: { authenticate: { accessToken }}} = authData
     console.log({ accessToken })
+    tokens[signer.address] = accessToken
     return accessToken
   } catch (err) {
     console.log('Error signing in: ', err)
   }
 
+  
 
 }

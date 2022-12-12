@@ -1,21 +1,22 @@
 import { ethers } from "hardhat";
 import LENS_HUB_ABI from '../abi/LensHubABI.json';
 import { DataTypes } from "../LensTypes/LensHub";
-import { client, challenge, authenticate } from '../lensApi/api'
+import { mumbaiClient, challenge, authenticate, client } from '../lensApi/api'
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {getToken} from './helpers/authenticate'
 import { v4 as uuidv4 } from 'uuid';
 import { uploadIpfs } from "./helpers/ipfs";
 import { Metadata, PublicationMainFocus } from "./helpers/interfaces/publication";
-import { CreatePostTypedDataDocument, CreatePublicPostRequest } from "./helpers/graphql/generated";
+import { CreatePostTypedDataDocument, CreatePublicPostRequest, BroadcastDocument, BroadcastRequest} from "./helpers/graphql/generated";
 import { Signer, TypedDataDomain } from "ethers";
 import { omit } from "./helpers/helpers";
 
 const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
 
-export const createPostTypedData = async (request: CreatePublicPostRequest) => {
+export const createPostTypedData = async (request: CreatePublicPostRequest, signer: SignerWithAddress) => {
+  const client = await mumbaiClient(signer)
   const result = await client.mutation(CreatePostTypedDataDocument, {request}).toPromise()
-
+  console.log(result)
   return result.data!.createPostTypedData;
 };
 
@@ -36,7 +37,7 @@ export const signedTypeData = (
 
 
 export const signCreatePostTypedData = async (request: CreatePublicPostRequest, signer: SignerWithAddress) => {
-  const result = await createPostTypedData(request);
+  const result = await createPostTypedData(request, signer);
   console.log('create post: createPostTypedData', result);
 
   const typedData = result.typedData;
@@ -116,9 +117,10 @@ const createPostRequest = {
 
 const signedResult = await signCreatePostTypedData(createPostRequest, poster);
 console.log('create post: signedResult', signedResult);
-
-
-
+const {result: {id}, signature} = signedResult
+const signerClient = await mumbaiClient(poster)
+const result = await signerClient.mutation(BroadcastDocument, {request: {id, signature}}).toPromise()
+console.log(result)
 
 // for(let i = 0; i<createProfileContracts.length; i++) {
 //   let CCreateProfile = createProfileContracts[i]
