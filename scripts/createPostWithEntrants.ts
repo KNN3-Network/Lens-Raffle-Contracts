@@ -8,17 +8,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { uploadIpfs } from "./helpers/ipfs";
 import { Metadata, PublicationMainFocus } from "./helpers/interfaces/publication";
 import { CreatePostTypedDataDocument, CreatePublicPostRequest, BroadcastDocument, BroadcastRequest} from "./helpers/graphql/generated";
-import { Signer, TypedDataDomain } from "ethers";
+import { BigNumber, Signer, TypedDataDomain } from "ethers";
 import { omit } from "./helpers/helpers";
+import { useIpfs } from "./helpers/useIpfs";
+import { getCreateCommentRequest, getCreatePostRequest, signCreateCommentTypedData, signCreatePostTypedData } from "./helpers/pub";
+import { pollUntilIndexed } from "./helpers/indexer/has-transaction-been-indexed";
 
 const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
 
-export const createPostTypedData = async (request: CreatePublicPostRequest, signer: SignerWithAddress) => {
-  const client = await mumbaiClient(signer)
-  const result = await client.mutation(CreatePostTypedDataDocument, {request}).toPromise()
-  console.log(result)
-  return result.data!.createPostTypedData;
-};
 
 export const signedTypeData = (
   domain: TypedDataDomain,
@@ -36,18 +33,6 @@ export const signedTypeData = (
 };
 
 
-export const signCreatePostTypedData = async (request: CreatePublicPostRequest, signer: SignerWithAddress) => {
-  const result = await createPostTypedData(request, signer);
-  console.log('create post: createPostTypedData', result);
-
-  const typedData = result.typedData;
-  console.log('create post: typedData', typedData);
-
-  const signature = await signedTypeData(typedData.domain, typedData.types, typedData.value, signer);
-  console.log('create post: signature', signature);
-
-  return { result, signature };
-};
 
 
 //the purpose of this script is to create a post and have the other signers comment. 
@@ -60,81 +45,65 @@ async function main() {
 
 // dep0 makes a post, dep1, dep2, dep3 comment. 
 const poster = deployers[0]
-  
-const token = await getToken(poster)
+const posterProfileId = (await contracts[0].defaultProfile(poster.address)).toHexString() // getting it from on-chain LENSTER DOES NOT DO THIS
 
-const ipfsResult = await uploadIpfs<Metadata>({
-  version: '2.0.0',
-  mainContentFocus: PublicationMainFocus.TEXT_ONLY,
-  metadata_id: uuidv4(),
-  description: 'Description',
-  locale: 'en-US',
-  content: 'Content',
-  external_url: null,
-  image: null,
-  imageMimeType: null,
-  name: 'Name',
-  attributes: [],
-  tags: ['using_api_examples'],
-  appId: 'api_examples_github',
-});
-console.log('create post: ipfs result', ipfsResult);
+const ipfsResult = await useIpfs(`lucky lens 0 giveaway :)`)
 
-const profileId = (await contracts[0].defaultProfile(poster.address)).toHexString() // getting it from on-chain
-console.log(profileId)
 
-// hard coded to make the code example clear
-const createPostRequest = {
-  profileId,
-  contentURI: `ipfs://${ipfsResult.path}`,
-  collectModule: {
-    // feeCollectModule: {
-    //   amount: {
-    //     currency: currencies.enabledModuleCurrencies.map(
-    //       (c: any) => c.address
-    //     )[0],
-    //     value: '0.000001',
-    //   },
-    //   recipient: address,
-    //   referralFee: 10.5,
-    // },
-    // revertCollectModule: true,
-    freeCollectModule: { followerOnly: true },
-    // limitedFeeCollectModule: {
-    //   amount: {
-    //     currency: '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
-    //     value: '2',
-    //   },
-    //   collectLimit: '20000',
-    //   recipient: '0x3A5bd1E37b099aE3386D13947b6a90d97675e5e3',
-    //   referralFee: 0,
-    // },
-  },
-  referenceModule: {
-    followerOnlyReferenceModule: false,
-  },
-};
+const createPostRequest = getCreatePostRequest(posterProfileId, ipfsResult)
 
 const signedResult = await signCreatePostTypedData(createPostRequest, poster);
 console.log('create post: signedResult', signedResult);
+
+const nonce = signedResult.result.typedData.value.nonce + 1
+console.log(`nonce is ${nonce}`)
+const bigNum = BigNumber.from(nonce)
+const pubId = bigNum.toHexString()
+console.log(`pubId: ${pubId}`, typeof pubId)
 const {result: {id}, signature} = signedResult
+
 const signerClient = await mumbaiClient(poster)
-const result = await signerClient.mutation(BroadcastDocument, {request: {id, signature}}).toPromise()
-console.log(result)
+const broadcastResult = await signerClient.mutation(BroadcastDocument, {request: {id, signature}}).toPromise()
+console.log('broadcast post:', broadcastResult);
+if (broadcastResult.data?.broadcast.__typename !== 'RelayerResult') {
+  console.error('follow with broadcast: failed', broadcastResult);
+  throw new Error('follow with broadcast: failed');
+}
 
-// for(let i = 0; i<createProfileContracts.length; i++) {
-//   let CCreateProfile = createProfileContracts[i]
-//   let deployer = deployers[i]
-//   let address = await deployer.getAddress()
-//   console.log('creating profile ', i)
+console.log('create post: poll until indexed');
+const indexedResult = await pollUntilIndexed({txHash: broadcastResult.data.broadcast.txHash}, poster)
+
+console.log('create post: post has been indexed');
+
+// this is so fucking stupid the way they did this
+
+// // copy above logic but do it for post
+for(let i = 1; i<deployers.length ; i++) {
+  const commenter = deployers[i]
+  const profileId = (await contracts[0].defaultProfile(commenter.address)).toHexString()
+  // {profileId}-{publicationId}
+  const ipfsResult = await useIpfs(`I am entry number ${i}. pick me! pick me!`)
+  const createCommentRequest = getCreateCommentRequest(profileId, posterProfileId, pubId, ipfsResult)
+  console.log(createCommentRequest)
+  const signedResult = await signCreateCommentTypedData(createCommentRequest, commenter)
+  console.log('create comment: signedResult', signedResult)
+  const {result: {id}, signature} = signedResult
+
+  const signerClient = await mumbaiClient(commenter)
+  const broadcastResult = await signerClient.mutation(BroadcastDocument, {request: {id, signature}}).toPromise()
+  console.log('broadcast comment:', broadcastResult);
+  if (broadcastResult.data?.broadcast.__typename !== 'RelayerResult') {
+  console.error('follow with broadcast: failed', broadcastResult);
+  throw new Error('follow with broadcast: failed');
+}
+console.log('create comment: poll until indexed');
+const indexedResult = await pollUntilIndexed({txHash: broadcastResult.data.broadcast.txHash}, commenter)
+
+console.log('create comment: comment has been indexed');
 
 
-//   let tx = await CCreateProfile.proxyCreateProfile([`${address}`, `luckylens${i}`, "" , '0x0000000000000000000000000000000000000000', '0x', ''], {gasLimit: 450000})
-//   console.log(`profile being created at tx_hash: ${tx.hash}`)
-//   let tx_r = await tx.wait(1)
-//   if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
-//   console.log(`profile successfully created for address ${i}`)
-// }
+}
+
 
 
 }

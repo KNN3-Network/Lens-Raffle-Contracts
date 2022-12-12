@@ -8,6 +8,7 @@ const API_URL = 'https://api-mumbai.lens.dev'
 let clients:{[address: string]: Client} = {}
 
 export const mumbaiClient = async (deployer: SignerWithAddress) => {
+  console.log(`mumbaiClient called, deployer is ${deployer.address}`)
 if(clients[deployer.address]) return clients[deployer.address]
 const token = await getToken(deployer)
 
@@ -15,7 +16,8 @@ clients[deployer.address] = createClient({
   url: API_URL,
   fetchOptions: {
     headers: { authorization: token ? `Bearer ${token}` : '' },
-  }
+  },
+  requestPolicy: "network-only"
 })
 return clients[deployer.address]
 }

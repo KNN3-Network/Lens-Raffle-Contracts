@@ -25,6 +25,7 @@ export const getToken = async (deployer: SignerWithAddress) => {
     const { data: { authenticate: { accessToken }}} = authData
     console.log({ accessToken })
     tokens[signer.address] = accessToken
+    console.log(tokens)
     return accessToken
   } catch (err) {
     console.log('Error signing in: ', err)
