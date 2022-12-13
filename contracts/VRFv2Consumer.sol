@@ -17,7 +17,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract VRFv2Consumer is VRFConsumerBaseV2 {
+abstract contract VRFv2Consumer is VRFConsumerBaseV2 {
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
@@ -95,16 +95,6 @@ contract VRFv2Consumer is VRFConsumerBaseV2 {
         lastRequestId = requestId;
         emit RequestSent(requestId, numWords);
         return requestId;
-    }
-
-    function fulfillRandomWords(
-        uint256 _requestId,
-        uint256[] memory _randomWords
-    ) internal override {
-        require(s_requests[_requestId].exists, "request not found");
-        s_requests[_requestId].fulfilled = true;
-        s_requests[_requestId].randomWords = _randomWords;
-        emit RequestFulfilled(_requestId, _randomWords);
     }
 
     function getRequestStatus(

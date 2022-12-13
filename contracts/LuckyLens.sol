@@ -20,6 +20,7 @@ struct Raffle {
 address immutable LensHubProxy;
 // mapping(bytes32 => uint) encodedRaffleToRandomNumber;
 mapping(bytes32 => Raffle) public encodedRaffleToRaffle;
+// Raffle[] public Raffles;
 
 
 constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
@@ -48,11 +49,25 @@ function postRaffle(uint profileId, uint pubId, uint time) public {
     emit PostRaffle(profileId, pubId, time, msg.sender);
 }
 
-// function _fetchRandom() public returns(uint requestId) {
-//     return super.requestRandomWords();
-// }
+// the actual calculation of who the winners are will be done off-chain
+function chooseRandomWinner() public  {
+    uint requestId = super.requestRandomWords();
+}
 
 
+
+
+
+// CALLBACK FUNC, SHOULD FULFILL RANDOMNESS IN THIS FUNC
+function fulfillRandomWords(
+        uint256 _requestId,
+        uint256[] memory _randomWords
+    ) internal override {
+        require(s_requests[_requestId].exists, "request not found");
+        s_requests[_requestId].fulfilled = true;
+        s_requests[_requestId].randomWords = _randomWords;
+        emit RequestFulfilled(_requestId, _randomWords);
+    }
 
 
 
