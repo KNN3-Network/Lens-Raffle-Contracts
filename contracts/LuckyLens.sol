@@ -20,7 +20,7 @@ struct Raffle {
 address immutable LensHubProxy;
 // mapping(bytes32 => uint) encodedRaffleToRandomNumber;
 // mapping(bytes32 => Raffle) public encodedRaffleToRaffle;
-mapping(uint => uint) requestIdToRaffleId;
+mapping(uint => uint) public requestIdToRaffleId;
 Raffle[] public Raffles;
 
 
@@ -29,18 +29,8 @@ constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
 }
 
 
-function _encodeRaffle(address owner, uint profileId, uint pubId, uint time) internal pure returns(bytes32) {
-    return(keccak256(abi.encode(owner, profileId, pubId, time)));
-}
-
-
-// function getRaffle(address owner, uint profileId, uint pubId, uint time) public view returns(Raffle memory) {
-//     return encodedRaffleToRaffle[_encodeRaffle(owner, profileId, pubId, time)];
-// }
-
 
 function postRaffle(uint profileId, uint pubId, uint time) public {
-
     Raffles.push(Raffle(msg.sender, profileId, pubId, time, 0));
     uint raffleId = Raffles.length - 1;
 
@@ -49,10 +39,11 @@ function postRaffle(uint profileId, uint pubId, uint time) public {
 
 // the actual calculation of who the winners are will be done off-chain
 function chooseRandomWinner(uint raffleId) public  {
-    require(msg.sender == Raffles[raffleId].owner, "only the owner can raffle");
+    require(Raffles[raffleId].owner != address(0), 'there is no raffle at this index / id');
+    require(msg.sender == Raffles[raffleId].owner, "only the owner can raffle"); // maybe remove in the future... is there really a need for this?
     require(Raffles[raffleId].randomNum == 0, "a winner has already been selected");
 
-    uint requestId = super.requestRandomWords();
+    uint requestId = super.requestRandomWords(raffleId);
     requestIdToRaffleId[requestId] = raffleId;
 }
 
@@ -72,7 +63,7 @@ function fulfillRandomWords(
         uint raffleId = requestIdToRaffleId[_requestId];
         Raffles[raffleId].randomNum = _randomWords[0];
 
-        emit RequestFulfilled(_requestId, _randomWords);
+        emit RequestFulfilled(raffleId, _requestId, _randomWords[0]);
     }
 
 

@@ -18,8 +18,8 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
  */
 
 abstract contract VRFv2Consumer is VRFConsumerBaseV2 {
-    event RequestSent(uint256 requestId, uint32 numWords);
-    event RequestFulfilled(uint256 requestId, uint256[] randomWords);
+    event RequestSent(uint256 indexed raffleId, uint256 indexed requestId, uint32 numWords);
+    event RequestFulfilled(uint256 indexed raffleId, uint256 indexed requestId, uint256 indexed randomNum);
 
     struct RequestStatus {
         bool fulfilled; // whether the request has been successfully fulfilled
@@ -74,7 +74,7 @@ abstract contract VRFv2Consumer is VRFConsumerBaseV2 {
     }
 
     // Assumes the subscription is funded sufficiently.
-    function requestRandomWords()
+    function requestRandomWords(uint raffleId)
         internal
         returns (uint256 requestId)
     {
@@ -93,7 +93,7 @@ abstract contract VRFv2Consumer is VRFConsumerBaseV2 {
         });
         requestIds.push(requestId);
         lastRequestId = requestId;
-        emit RequestSent(requestId, numWords);
+        emit RequestSent(raffleId, requestId, numWords);
         return requestId;
     }
 
