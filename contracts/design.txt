@@ -11,7 +11,9 @@ struct Raffle {
 
 
 the contract needs a way to look up a Raffle by requestId to fulfill it's random number, so we need. This is only used once a random number has been requested though.
-mapping(uint => Raffle) requestIdToRaffle
+NOT: mapping(uint => Raffle) requestIdToRaffle
+mapping(uint => uint) requestIdToRaffleId
+
 
 on the front end, I need a way to look up information on each raffle. I can query the keys from event logs. What keys will be in the event logs? Need something other than Random number...
 
@@ -21,6 +23,8 @@ Raffle[]
 instead of 
 mapping request Id to Raffle, I can do mapping request Id to Raffle Id
 and then look up the raffle in the array. 
+
+
 
 12/13 This is fine for now, and I will expose the Raffle Id in the event logs. 
 

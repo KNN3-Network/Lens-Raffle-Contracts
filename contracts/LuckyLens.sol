@@ -5,7 +5,7 @@ import './VRFv2Consumer.sol';
 
 contract LuckyLens is VRFv2Consumer {
 
-event PostRaffle(uint indexed profileId, uint indexed pubId, uint indexed time, address owner); // owner is msg.sender so easy to not index it
+event PostRaffle(uint indexed raffleId, uint indexed profileId, uint indexed pubId, uint time, address owner); // owner is msg.sender so easy to not index it
 
 
 struct Raffle {
@@ -19,8 +19,9 @@ struct Raffle {
 
 address immutable LensHubProxy;
 // mapping(bytes32 => uint) encodedRaffleToRandomNumber;
-mapping(bytes32 => Raffle) public encodedRaffleToRaffle;
-// Raffle[] public Raffles;
+// mapping(bytes32 => Raffle) public encodedRaffleToRaffle;
+mapping(uint => uint) requestIdToRaffleId;
+Raffle[] public Raffles;
 
 
 constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
@@ -33,25 +34,26 @@ function _encodeRaffle(address owner, uint profileId, uint pubId, uint time) int
 }
 
 
-function getRaffle(address owner, uint profileId, uint pubId, uint time) public view returns(Raffle memory) {
-    return encodedRaffleToRaffle[_encodeRaffle(owner, profileId, pubId, time)];
-}
+// function getRaffle(address owner, uint profileId, uint pubId, uint time) public view returns(Raffle memory) {
+//     return encodedRaffleToRaffle[_encodeRaffle(owner, profileId, pubId, time)];
+// }
 
 
 function postRaffle(uint profileId, uint pubId, uint time) public {
 
-    bytes32 encodedRaffle = _encodeRaffle(msg.sender, profileId, pubId, time);
+    Raffles.push(Raffle(msg.sender, profileId, pubId, time, 0));
+    uint raffleId = Raffles.length - 1;
 
-    require(encodedRaffleToRaffle[encodedRaffle].owner == address(0), "Raffle already exists at that profile, post, and time");
-
-    encodedRaffleToRaffle[encodedRaffle] = Raffle(msg.sender,  profileId, pubId, time, 0);
-
-    emit PostRaffle(profileId, pubId, time, msg.sender);
+    emit PostRaffle(raffleId, profileId, pubId, time, msg.sender);
 }
 
 // the actual calculation of who the winners are will be done off-chain
-function chooseRandomWinner() public  {
+function chooseRandomWinner(uint raffleId) public  {
+    require(msg.sender == Raffles[raffleId].owner, "only the owner can raffle");
+    require(Raffles[raffleId].randomNum == 0, "a winner has already been selected");
+
     uint requestId = super.requestRandomWords();
+    requestIdToRaffleId[requestId] = raffleId;
 }
 
 
@@ -66,6 +68,10 @@ function fulfillRandomWords(
         require(s_requests[_requestId].exists, "request not found");
         s_requests[_requestId].fulfilled = true;
         s_requests[_requestId].randomWords = _randomWords;
+
+        uint raffleId = requestIdToRaffleId[_requestId];
+        Raffles[raffleId].randomNum = _randomWords[0];
+
         emit RequestFulfilled(_requestId, _randomWords);
     }
 
