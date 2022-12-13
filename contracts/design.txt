@@ -1,0 +1,59 @@
+Let's think data structures. 
+
+
+struct Raffle {
+    address owner;
+    uint profileId;
+    uint pubId;
+    uint time;
+    uint randomNum;
+}
+
+
+the contract needs a way to look up a Raffle by requestId to fulfill it's random number, so we need. This is only used once a random number has been requested though.
+mapping(uint => Raffle) requestIdToRaffle
+
+on the front end, I need a way to look up information on each raffle. I can query the keys from event logs. What keys will be in the event logs? Need something other than Random number...
+
+Raffle[]
+
+
+instead of 
+mapping request Id to Raffle, I can do mapping request Id to Raffle Id
+and then look up the raffle in the array. 
+
+
+
+
+
+
+
+
+
+
+writing some sudo code here
+
+
+luckylens contract:
+
+
+immutable lenshubproxy address
+mapping giveaway => randomnumber
+mapping give
+
+giveaway is some hashing of posterId/pubId
+
+
+
+constructor: set lenshubproxy
+
+
+
+some functions:
+
+PostRaffle(uint posterId, uint pubId, time)
+check msg.sender is poster (do we need this???? maybe not)
+
+
+RevealWinner(post)
+check msg.sender way the raffle poster
