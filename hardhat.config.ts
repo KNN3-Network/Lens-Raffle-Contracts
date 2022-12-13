@@ -18,7 +18,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
     },
-    mumbai: {
+    mumbaiSim: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/LlPfIiQ_9R3vvvqY5HOadGN68ej0_I9z",
       // accounts: [DEV1, DEV2],
       accounts: {
@@ -32,8 +32,11 @@ const config: HardhatUserConfig = {
                       '0x80BF2f7A7391FfeD0BD61F752B24492D835123CB',
                       '0xc90aCECc8D50d116317797fD0330c7be77FdA0BA',
                       '0xC160ab0Db7E12419f24A2d20a4dD851a20BCE215' ]*/
-
-
+    },
+    mumbaiDev: {
+      url: "https://polygon-mumbai.g.alchemy.com/v2/LlPfIiQ_9R3vvvqY5HOadGN68ej0_I9z",
+      // accounts: [DEV1, DEV2],
+      accounts: [DEV1, DEV2],
     }
   },
   etherscan: {

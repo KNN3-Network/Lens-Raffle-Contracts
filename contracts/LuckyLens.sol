@@ -29,9 +29,11 @@ function _encodeRaffle(address owner, uint profileId, uint pubId, uint time) int
     return(keccak256(abi.encode(owner, profileId, pubId, time)));
 }
 
+
 function getRaffle(address owner, uint profileId, uint pubId, uint time) public view returns(Raffle memory) {
     return encodedRaffleToRaffle[_encodeRaffle(owner, profileId, pubId, time)];
 }
+
 
 function postRaffle(uint profileId, uint pubId, uint time) public {
 
@@ -42,7 +44,10 @@ function postRaffle(uint profileId, uint pubId, uint time) public {
     encodedRaffleToRaffle[encodedRaffle] = Raffle(msg.sender,  profileId, pubId, time, 0);
 
     emit PostRaffle(profileId, pubId, time, msg.sender);
+}
 
+function _fetchRandom() public {
+    
 }
 
 
