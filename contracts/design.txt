@@ -22,6 +22,9 @@ instead of
 mapping request Id to Raffle, I can do mapping request Id to Raffle Id
 and then look up the raffle in the array. 
 
+12/13 This is fine for now, and I will expose the Raffle Id in the event logs. 
+
+If something useful comes up in the future and I have a strong reason to add in some more data, then I will.
 
 
 
