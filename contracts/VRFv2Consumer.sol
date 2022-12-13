@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
-import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
+
 
 /**
  * Request testnet LINK and ETH here: https://faucets.chain.link/
@@ -17,7 +17,7 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract VRFv2Consumer is VRFConsumerBaseV2, ConfirmedOwner {
+contract VRFv2Consumer is VRFConsumerBaseV2 {
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
@@ -66,7 +66,6 @@ contract VRFv2Consumer is VRFConsumerBaseV2, ConfirmedOwner {
         uint64 subscriptionId
     )
         VRFConsumerBaseV2(0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed)
-        ConfirmedOwner(msg.sender)
     {
         COORDINATOR = VRFCoordinatorV2Interface(
             0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed
@@ -76,8 +75,7 @@ contract VRFv2Consumer is VRFConsumerBaseV2, ConfirmedOwner {
 
     // Assumes the subscription is funded sufficiently.
     function requestRandomWords()
-        external
-        onlyOwner
+        internal
         returns (uint256 requestId)
     {
         // Will revert if subscription is not set and funded.

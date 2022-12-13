@@ -48,9 +48,10 @@ function postRaffle(uint profileId, uint pubId, uint time) public {
     emit PostRaffle(profileId, pubId, time, msg.sender);
 }
 
-function _fetchRandom() public {
-    
-}
+// function _fetchRandom() public returns(uint requestId) {
+//     return super.requestRandomWords();
+// }
+
 
 
 
