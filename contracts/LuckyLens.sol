@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.10;
 
-contract LuckyLens {
+import './VRFv2Consumer.sol';
+
+contract LuckyLens is VRFv2Consumer {
 
 event PostRaffle(uint indexed profileId, uint indexed pubId, uint indexed time, address owner); // owner is msg.sender so easy to not index it
 
@@ -20,7 +22,7 @@ address immutable LensHubProxy;
 mapping(bytes32 => Raffle) public encodedRaffleToRaffle;
 
 
-constructor(address _lensHubProxy) {
+constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
     LensHubProxy = _lensHubProxy;
 }
 
