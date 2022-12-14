@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import './VRFv2Consumer.sol';
 
+
 contract LuckyLens is VRFv2Consumer {
 
 event PostRaffle(uint indexed raffleId, uint indexed profileId, uint indexed pubId, uint time, address owner); // owner is msg.sender so easy to not index it
@@ -29,8 +30,12 @@ constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
 }
 
 
-
-function postRaffle(uint profileId, uint pubId, uint time) public {
+/* 
+the actual publication link can contain the requirements. we'll have a couple defaults on the verifier: must follow poster & comment. or must comment, but having the
+requirements in the publication will be necessary to communicate to your audience how to enter the raffle anyway, and this leaves interesting options open for verification,
+for example, "you must follow these 3 users and donate 3 hubbabubba coins in order to qualify"
+*/
+function postRaffle(uint profileId, uint pubId, uint time) public { 
     Raffles.push(Raffle(msg.sender, profileId, pubId, time, 0));
     uint raffleId = Raffles.length - 1;
 
