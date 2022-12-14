@@ -35,11 +35,12 @@ the actual publication link can contain the requirements. we'll have a couple de
 requirements in the publication will be necessary to communicate to your audience how to enter the raffle anyway, and this leaves interesting options open for verification,
 for example, "you must follow these 3 users and donate 3 hubbabubba coins in order to qualify"
 */
-function postRaffle(uint profileId, uint pubId, uint time) public { 
+function postRaffle(uint profileId, uint pubId, uint time) public returns (uint) { 
     Raffles.push(Raffle(msg.sender, profileId, pubId, time, 0));
     uint raffleId = Raffles.length - 1;
 
     emit PostRaffle(raffleId, profileId, pubId, time, msg.sender);
+    return raffleId;
 }
 
 // the actual calculation of who the winners are will be done off-chain
@@ -47,9 +48,17 @@ function chooseRandomWinner(uint raffleId) public  {
     require(Raffles[raffleId].owner != address(0), 'there is no raffle at this index / id');
     require(msg.sender == Raffles[raffleId].owner, "only the owner can raffle"); // maybe remove in the future... is there really a need for this?
     require(Raffles[raffleId].randomNum == 0, "a winner has already been selected");
+    require(block.timestamp >= Raffles[raffleId].time, "it's too early to select a winner");
 
     uint requestId = super.requestRandomWords(raffleId);
     requestIdToRaffleId[requestId] = raffleId;
+}
+
+function NewRaffleDrawNow(uint profileId, uint pubId) public {
+    // post raffle with low time that will always be less than block.timestamp. put it at 1 to specify intentionally
+    uint raffleId = postRaffle(profileId, pubId, 1);
+
+    chooseRandomWinner(raffleId);
 }
 
 
