@@ -30,6 +30,15 @@ constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
 }
 
 
+function getRandomNums(uint[] calldata raffleIds) public view returns(uint[] memory) {
+    uint[] memory randomNums = new uint[](raffleIds.length);
+    for (uint i = 0; i < raffleIds.length; i++) {
+        randomNums[i] = Raffles[raffleIds[i]].randomNum;
+    }
+    return randomNums;
+}
+
+
 /* 
 the actual publication link can contain the requirements. we'll have a couple defaults on the verifier: must follow poster & comment. or must comment, but having the
 requirements in the publication will be necessary to communicate to your audience how to enter the raffle anyway, and this leaves interesting options open for verification,
@@ -55,7 +64,7 @@ function chooseRandomWinner(uint raffleId) public  {
 }
 
 function newRaffleDrawNow(uint profileId, uint pubId) public {
-    
+
     // post raffle with low time that will always be less than block.timestamp. put it at 1 to specify intentionally
     uint raffleId = postRaffle(profileId, pubId, 1);
 
