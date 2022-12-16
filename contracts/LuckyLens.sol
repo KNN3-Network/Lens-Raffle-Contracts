@@ -6,14 +6,14 @@ import './VRFv2Consumer.sol';
 
 contract LuckyLens is VRFv2Consumer {
 
-event PostRaffle(address indexed owner, uint indexed raffleId, uint indexed profileId, uint pubId, uint48 time); // owner is msg.sender so easy to not index it
+event PostRaffle(address indexed owner, uint indexed raffleId, uint indexed profileId, uint pubId, uint time); // owner is msg.sender so easy to not index it
 
 
 struct Raffle {
     address owner;
     uint profileId;
     uint pubId;
-    uint48 time;
+    uint time;
     uint randomNum;
 }
 
@@ -56,7 +56,7 @@ the actual publication link can contain the requirements. we'll have a couple de
 requirements in the publication will be necessary to communicate to your audience how to enter the raffle anyway, and this leaves interesting options open for verification,
 for example, "you must follow these 3 users and donate 3 hubbabubba coins in order to qualify"
 */
-function postRaffle(uint profileId, uint pubId, uint48 time) public returns (uint) { 
+function postRaffle(uint profileId, uint pubId, uint time) public returns (uint) { 
     Raffles.push(Raffle(msg.sender, profileId, pubId, time, 0));
     uint raffleId = Raffles.length - 1;
 
@@ -78,7 +78,7 @@ function chooseRandomWinner(uint raffleId) public  {
 function newRaffleDrawNow(uint profileId, uint pubId) public {
 
     // post raffle with low time that will always be less than block.timestamp. put it at 1 to specify intentionally
-    uint raffleId = postRaffle(profileId, pubId, 1);
+    uint raffleId = postRaffle(profileId, pubId, block.timestamp);
 
     chooseRandomWinner(raffleId);
 }
