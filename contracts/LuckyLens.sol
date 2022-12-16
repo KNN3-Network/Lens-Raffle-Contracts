@@ -29,12 +29,16 @@ constructor(uint64 id, address _lensHubProxy) VRFv2Consumer(id) {
     LensHubProxy = _lensHubProxy;
 }
 
+// can delete these 2 functions later. I was struggling with javascript <> solidity time
 function isAfter(uint256 timeInSeconds) public view returns(bool) {
     return (block.timestamp > timeInSeconds);
 }
-
 function timestamp() public view returns(uint256) {
     return block.timestamp;
+}
+
+function totalRaffles() public view returns(uint) {
+    return Raffles.length;
 }
 
 
