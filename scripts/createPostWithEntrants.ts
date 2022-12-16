@@ -45,7 +45,10 @@ async function main() {
 
 // dep0 makes a post, dep1, dep2, dep3 comment. 
 const poster = deployers[0]
-const posterProfileId = (await contracts[0].defaultProfile(poster.address)).toHexString() // getting it from on-chain LENSTER DOES NOT DO THIS
+const posterProfileId:string = (await contracts[0].defaultProfile(poster.address)).toHexString() // getting it from on-chain LENSTER DOES NOT DO THIS
+const profileIdNum = (await contracts[0].defaultProfile(poster.address)).toString() // dec for the end
+// console.log(profileIdNum)
+
 
 const ipfsResult = await useIpfs(`lucky lens 0 giveaway :)`)
 
@@ -59,7 +62,7 @@ const nonce = signedResult.result.typedData.value.nonce + 1
 console.log(`nonce is ${nonce}`)
 const bigNum = BigNumber.from(nonce)
 const pubId = bigNum.toHexString()
-console.log(`pubId: ${pubId}`, typeof pubId)
+const pubIdNum = bigNum.toString() // dec for the end
 const {result: {id}, signature} = signedResult
 
 const signerClient = await mumbaiClient(poster)
@@ -77,6 +80,7 @@ console.log('create post: post has been indexed');
 
 // this is so fucking stupid the way they did this
 
+
 // // copy above logic but do it for post
 for(let i = 1; i<deployers.length ; i++) {
   const commenter = deployers[i]
@@ -93,16 +97,17 @@ for(let i = 1; i<deployers.length ; i++) {
   const broadcastResult = await signerClient.mutation(BroadcastDocument, {request: {id, signature}}).toPromise()
   console.log('broadcast comment:', broadcastResult);
   if (broadcastResult.data?.broadcast.__typename !== 'RelayerResult') {
-  console.error('follow with broadcast: failed', broadcastResult);
-  throw new Error('follow with broadcast: failed');
+  console.error('comment with broadcast: failed', broadcastResult);
+  throw new Error('comment with broadcast: failed');
 }
 console.log('create comment: poll until indexed');
 const indexedResult = await pollUntilIndexed({txHash: broadcastResult.data.broadcast.txHash}, commenter)
 
 console.log('create comment: comment has been indexed');
-
-
 }
+
+
+console.log(`POSTS AND COMMENTS SUCCESSFUL @ProfileId: ${profileIdNum} and pubId: ${pubIdNum}`)
 
 
 

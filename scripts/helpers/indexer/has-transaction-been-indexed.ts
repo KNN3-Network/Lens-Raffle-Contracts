@@ -15,8 +15,10 @@ export const pollUntilIndexed = async (input: { txHash: string } | { txId: strin
     console.log('pool until indexed: result', response);
 
     if (response.__typename === 'TransactionIndexedResult') {
-      console.log('pool until indexed: indexed', response.indexed);
-      console.log('pool until metadataStatus: metadataStatus', response.metadataStatus);
+      console.log('pool until indexed: indexed');
+      // console.log('pool until indexed: indexed', response.indexed);
+      // console.log('pool until metadataStatus: metadataStatus', response.metadataStatus);
+      console.log('pool until metadataStatus: metadataStatus');
 
       console.log(response.metadataStatus);
       if (response.metadataStatus) {
