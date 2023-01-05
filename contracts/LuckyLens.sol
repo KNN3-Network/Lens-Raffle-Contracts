@@ -6,7 +6,7 @@ import './VRFv2Consumer.sol';
 
 contract LuckyLens is VRFv2Consumer {
 
-event PostRaffle(address indexed owner, uint indexed raffleId, uint indexed profileId, uint pubId, uint time); // owner is msg.sender so easy to not index it
+event PostRaffle(address indexed owner, uint raffleId, uint indexed profileId, uint indexed pubId, uint time); 
 
 
 struct Raffle {
