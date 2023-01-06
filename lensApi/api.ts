@@ -7,6 +7,8 @@ const API_URL = 'https://api-mumbai.lens.dev'
 
 let clients:{[address: string]: Client} = {}
 
+
+// returns authenticated client to call from
 export const mumbaiClient = async (deployer: SignerWithAddress) => {
   console.log(`mumbaiClient called, deployer is ${deployer.address}`)
 if(clients[deployer.address]) return clients[deployer.address]

@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { mumbaiClient } from "../../lensApi/api";
-import { signedTypeData } from "../createPostWithEntrants";
+import { signedTypeData } from "./helpers";
 import { CreateCommentTypedDataDocument, CreatePostTypedDataDocument, CreatePublicCommentRequest, CreatePublicPostRequest } from "./graphql/generated";
 import type {AddResult} from 'ipfs-core-types/src/root'
 

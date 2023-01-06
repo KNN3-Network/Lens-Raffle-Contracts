@@ -1,8 +1,13 @@
 import { ethers } from "hardhat";
 import LENS_HUB_ABI from '../abi/LensHubABI.json';
 import MOCK_PROFILE_CREATION_PROXY_ABI from '../abi/CreateProfileAbi.json'
+import { getToken } from "./helpers/authenticate";
+import { mumbaiClient } from "../lensApi/api";
+import { BroadcastDocument, CreateFollowTypedDataDocument } from "./helpers/graphql/generated";
+import { signedTypeData } from "./helpers/helpers";
+import { pollUntilIndexed } from "./helpers/indexer/has-transaction-been-indexed";
 const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
-// const MOCK_PROXY_
+
 
 async function main() {
   const deployers = await ethers.getSigners()
@@ -12,22 +17,39 @@ async function main() {
 
 
 
-// for(let i = 0; i<contracts.length; i++) {
-//   let LensHub = contracts[i]
-//   let deployer = deployers[i]
-//   let address = await deployer.getAddress()
-//   console.log('creating profile ', i)
+// for every deployer 1 - 3, we want to connect to the API, authenticate, and submit a follow request
+for(let i = 1; i < 4; i++) {
+  const user = deployers[i]
+  const client = await mumbaiClient(user)
+  const request = {follow: [
+    {
+      profile: "0x6105"
+    }
+  ]}
 
+  const result = await client.mutation(CreateFollowTypedDataDocument, {request}).toPromise()
+  
+  const id:string = result.data!.createFollowTypedData.id
+  
 
-//   let tx = await LensHub.proxyCreateProfile([`${address}`, `luckylens${i}`, "" , '0x0000000000000000000000000000000000000000', '0x', ''], {gasLimit: 450000})
-//   console.log(`profile being created at tx_hash: ${tx.hash}`)
-//   let tx_r = await tx.wait(1)
-//   if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
-//   console.log(`profile successfully created for address ${i}`)
-// }
+  const typedData = result.data?.createFollowTypedData.typedData!;
+  console.log('follow: typedData', typedData);
 
+  const signature = await signedTypeData(typedData.domain, typedData.types, typedData.value, user);
+  console.log('follow: signature', signature);
 
+  const broadcastResult = await client.mutation(BroadcastDocument, {request: {id, signature}}).toPromise()
+  console.log('broadcast follow:', broadcastResult);
+  if (broadcastResult.data?.broadcast.__typename !== 'RelayerResult') {
+  console.error('follow with broadcast: failed', broadcastResult);
+  throw new Error('follow with broadcast: failed');
+}
+console.log('create follow: poll until indexed');
+const indexedResult = await pollUntilIndexed({txHash: broadcastResult.data.broadcast.txHash}, user)
 
+console.log('create follow: follow has been indexed');
+
+}
 
 
 

@@ -8,6 +8,7 @@ dotenv.config({path: '~/.zshrc'});
 
 const DEV1:string = process.env.DEV_PRIVATE_KEY || ""
 const DEV2:string =  process.env.DEV_PRIVATE_KEY_2 || ""
+const MNEMONIC:string = process.env.TEST_MNEMONIC || ""
 
 const config: HardhatUserConfig = {
   solidity: {compilers: [
@@ -22,16 +23,17 @@ const config: HardhatUserConfig = {
       url: "https://polygon-mumbai.g.alchemy.com/v2/LlPfIiQ_9R3vvvqY5HOadGN68ej0_I9z",
       // accounts: [DEV1, DEV2],
       accounts: {
-        mnemonic: "find blind choose clarify exercise spider faith laundry modify coast scorpion mansion buyer ceiling meadow hospital license hedgehog cost divide length boy ceiling critic",
+        mnemonic: MNEMONIC,
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 5,
         passphrase: "",
-      } /* generates ['0x0bFe1e2D713B25606aF16c5A6969Ef89F062e108',
-                      '0x8b0b487bc4c727E7086a94a3843E6d5b1BeF3859',
-                      '0x80BF2f7A7391FfeD0BD61F752B24492D835123CB',
-                      '0xc90aCECc8D50d116317797fD0330c7be77FdA0BA',
-                      '0xC160ab0Db7E12419f24A2d20a4dD851a20BCE215' ]*/
+      } /* generates 0x1cCb1bceD04De363b6515367945E8076ca060299
+                     0xf760b66ed5A6a58A092eEd2DCf41EeEdcb9EC1c4
+                     0x8653f6b8Cea55361c746Df350516Bc62DAA176Df
+                     0x437dA8CAB2BbA532f574a8D0238A775bDAb4cBe0
+                     0xF47708d43b8D186dc473B779E6Ec19b6B1155c3c
+                     */
     },
     mumbaiDev: {
       url: "https://polygon-mumbai.g.alchemy.com/v2/LlPfIiQ_9R3vvvqY5HOadGN68ej0_I9z",

@@ -6,6 +6,7 @@ const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
 
 async function main() {
   const deployers = await ethers.getSigners()
+  for(let deployer of deployers) console.log(deployer.address)
   // array of 5 signers
   const contracts = await Promise.all(deployers.map(async dep => await ethers.getContractAt(LENS_HUB_ABI, LENS_HUB_MUMBAI_PROXY, dep)))
 
@@ -34,34 +35,34 @@ async function main() {
 const MOCK_PROFILE_CREATION_PROXY = "0x420f0257D43145bb002E69B14FF2Eb9630Fc4736"
 const createProfileContracts = await Promise.all(deployers.map(async dep => await ethers.getContractAt(MOCK_PROFILE_CREATION_PROXY_ABI, MOCK_PROFILE_CREATION_PROXY, dep)))
 
-for(let i = 0; i<createProfileContracts.length; i++) {
-  let CCreateProfile = createProfileContracts[i]
-  let deployer = deployers[i]
-  let address = await deployer.getAddress()
-  console.log('creating profile ', i)
-
-
-  let tx = await CCreateProfile.proxyCreateProfile([`${address}`, `luckylens${i}`, "" , '0x0000000000000000000000000000000000000000', '0x', ''], {gasLimit: 450000})
-  console.log(`profile being created at tx_hash: ${tx.hash}`)
-  let tx_r = await tx.wait(1)
-  console.log(tx_r.events)
-  if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
-  console.log(`profile successfully created for address ${i}`)
-}
-
-// let profileIds = ['23706', '23707', '23708', '23709', '23710' ]
-
-// for(let i = 0; i<contracts.length; i++) {
-//   let Hub = contracts[i]
+// for(let i = 0; i<createProfileContracts.length; i++) {
+//   let CCreateProfile = createProfileContracts[i]
 //   let deployer = deployers[i]
 //   let address = await deployer.getAddress()
+//   console.log('creating profile ', i)
 
-//   let tx = await Hub.setDefaultProfile(profileIds[i])
-//   console.log(`profile being set for ${i} at tx_hash: ${tx.hash}`)
+
+//   let tx = await CCreateProfile.proxyCreateProfile([`${address}`, `lenstester${i}`, "" , '0x0000000000000000000000000000000000000000', '0x', ''], {gasLimit: 450000})
+//   console.log(`profile being created at tx_hash: ${tx.hash}`)
 //   let tx_r = await tx.wait(1)
+//   console.log(tx_r.events)
 //   if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
-//   console.log(`profile successfully set for address ${i}`)
+//   console.log(`profile successfully created for address ${i}`)
 // }
+
+let profileIds = ['24837', '24838', '24839', '24840', '24841' ] // hardcoded for ease!! 
+
+for(let i = 0; i<contracts.length; i++) {
+  let Hub = contracts[i]
+  let deployer = deployers[i]
+  let address = await deployer.getAddress()
+
+  let tx = await Hub.setDefaultProfile(profileIds[i])
+  console.log(`profile being set for ${i} at tx_hash: ${tx.hash}`)
+  let tx_r = await tx.wait(1)
+  if(tx_r.status !== 1) throw new Error("tx resp status was not 1")
+  console.log(`profile successfully set for address ${i}`)
+}
 
 
 }

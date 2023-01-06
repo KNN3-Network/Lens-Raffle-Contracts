@@ -17,23 +17,6 @@ import { pollUntilIndexed } from "./helpers/indexer/has-transaction-been-indexed
 const LENS_HUB_MUMBAI_PROXY = "0x60Ae865ee4C725cd04353b5AAb364553f56ceF82"
 
 
-export const signedTypeData = (
-  domain: TypedDataDomain,
-  types: Record<string, any>,
-  value: Record<string, any>,
-  signer: SignerWithAddress
-) => {
-  // const signer = getSigner();
-  // remove the __typedname from the signature!
-  return signer._signTypedData(
-    omit(domain, '__typename'),
-    omit(types, '__typename'),
-    omit(value, '__typename')
-  );
-};
-
-
-
 
 //the purpose of this script is to create a post and have the other signers comment. 
 async function main() {
